@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>メトロセブン・エイトライナー 懇願サイト</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+          integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+            integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+            crossorigin=""></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>メトロセブン・エイトライナー 懇願サイト🙏</h1>
+    <div class="container">
+        <div class="form-container">
+            <form id="routeForm">
+                <div class="input-group">
+                    <label for="startStation">出発駅コード 例:1131217 (荻窪)</label>
+                    <input type="text" id="startStation" required>
+                </div>
+                <div class="input-group">
+                    <label for="endStation">到着駅コード  例:2200711 (井荻)</label>
+                    <input type="text" id="endStation" required>
+                </div>
+                <button type="submit">経路を検索!</button>
+            </form>
+            <div id="routeInfo"></div>
+        </div>
+        <div id="mapid"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
