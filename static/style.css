@@ -80,3 +80,97 @@ button:hover {
     color: #856404;
     border-radius: 4px;
 }
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 100px);
+}
+
+.form-container {
+    flex: 0 0 300px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+#mapid {
+    flex: 1;
+    min-height: 600px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#routeInfo {
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.station {
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #fff;
+    border-left: 4px solid #007bff;
+}
+
+.transfer {
+    margin: 5px 0;
+    padding: 5px;
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 4px;
+}

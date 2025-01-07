@@ -3,13 +3,14 @@ package main
 import (
 	"container/heap"
 	"database/sql"
+	"fmt"
 	"math"
 )
 
 const (
 	EARTH_RADIUS  = 6371
 	INF           = math.MaxFloat64
-	MAX_DISTANCE  = 10.0
+	MAX_DISTANCE  = 100.0
 	TRANSFER_COST = 10.0 // 乗換ペナルティ
 )
 
@@ -21,11 +22,6 @@ type Station struct {
 	LineCD      int
 	Lon         float64
 	Lat         float64
-}
-
-type RouteRequest struct {
-	StartCD string `json:"startCD"`
-	EndCD   string `json:"endCD"`
 }
 
 type StationPath struct {
@@ -104,33 +100,83 @@ func getStations(db *sql.DB) (map[int]*Station, error) {
 	return stations, nil
 }
 
-func buildGraph(stations map[int]*Station) map[int]map[int]float64 {
+func getStationConnections(db *sql.DB) (map[int]map[int]bool, error) {
+	connections := make(map[int]map[int]bool)
+
+	rows, err := db.Query(`
+        SELECT station_cd1, station_cd2
+        FROM m_station_join
+    `)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var station1, station2 string
+		if err := rows.Scan(&station1, &station2); err != nil {
+			return nil, err
+		}
+
+		if connections[atoi(station1)] == nil {
+			connections[atoi(station1)] = make(map[int]bool)
+		}
+		if connections[atoi(station2)] == nil {
+			connections[atoi(station2)] = make(map[int]bool)
+		}
+		connections[atoi(station1)][atoi(station2)] = true
+		connections[atoi(station2)][atoi(station1)] = true
+	}
+
+	return connections, nil
+}
+
+func buildGraph(stations map[int]*Station, db *sql.DB, allow78flag bool) (map[int]map[int]float64, error) {
 	graph := make(map[int]map[int]float64)
 
 	for id := range stations {
 		graph[id] = make(map[int]float64)
 	}
 
-	for id1, s1 := range stations {
-		for id2, s2 := range stations {
-			if id1 == id2 {
+	connections, err := getStationConnections(db)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return nil, err
+	}
+
+	for station1ID, connected := range connections {
+		s1, exists := stations[station1ID]
+		if !exists {
+			continue
+		}
+
+		for station2ID := range connected {
+			s2, exists := stations[station2ID]
+			if !exists {
 				continue
 			}
 
-			if s1.LineCD == s2.LineCD {
-				dist := calcDistance(s1.Lat, s1.Lon, s2.Lat, s2.Lon)
-				if dist < MAX_DISTANCE {
-					graph[id1][id2] = dist
-				}
+			// メトロセブン・エイトライナーの駅は除外
+			if !allow78flag && (s1.LineCD == 9999 || s2.LineCD == 9999) {
+				fmt.Println("Allow 78 flag is false")
+				continue
 			}
 
-			if s1.StationGCD == s2.StationGCD && s1.StationGCD != 0 {
+			dist := calcDistance(s1.Lat, s1.Lon, s2.Lat, s2.Lon)
+			graph[station1ID][station2ID] = dist
+		}
+	}
+
+	// 乗換可能な駅を接続
+	for id1, s1 := range stations {
+		for id2, s2 := range stations {
+			if id1 != id2 && s1.StationGCD == s2.StationGCD && s1.StationGCD != 0 {
 				graph[id1][id2] = TRANSFER_COST
 			}
 		}
 	}
 
-	return graph
+	return graph, nil
 }
 
 // ダイクストラ法で最短経路を求める

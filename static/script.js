@@ -27,6 +27,7 @@ async function handleFormSubmit(e) {
     
     const startStation = document.getElementById('startStation').value;
     const endStation = document.getElementById('endStation').value;
+    const allow78 = document.querySelector('input[name="allow78"]:checked').value === 'true';
 
     try {
         const response = await fetch('/api/route', {
@@ -36,7 +37,8 @@ async function handleFormSubmit(e) {
             },
             body: JSON.stringify({
                 startCD: startStation,
-                endCD: endStation
+                endCD: endStation,
+                allow78: !allow78,
             })
         });
 
@@ -50,6 +52,7 @@ async function handleFormSubmit(e) {
         alert(error.message);
     }
 }
+
 
 // 経路を地図上に表示
 function drawRoute(routeData) {
@@ -73,7 +76,7 @@ function drawRouteInfo(routeData) {
     const routeInfo = document.getElementById('routeInfo');
     routeInfo.innerHTML = `
         <h3>経路案内</h3>
-        <p>総距離: ${routeData.totalDistance.toFixed(2)} km (不正確です)</p>
+        <p>総距離: ${routeData.totalDistance.toFixed(2)} km</p>
         <div id="stationList"></div>
     `;
 }
@@ -81,6 +84,7 @@ function drawRouteInfo(routeData) {
 // 駅と線路を表示
 function drawStations(routeData) {
     const stationList = document.getElementById('stationList');
+    console.log(routeData);
     let currentLine = null;
     let currentPoints = [];
     
@@ -145,6 +149,8 @@ function drawRouteLine(points, lineCD) {
         }).addTo(map);
     }
 }
+
+
 
 // 地図の表示範囲調整
 function adjustMapBounds(routeData) {
