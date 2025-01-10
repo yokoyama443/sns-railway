@@ -46,6 +46,8 @@ func main() {
 		r.Post("/route", handleRoute)
 	})
 
+	initGraph(db)
+
 	port := ":8080"
 	log.Printf("Server starting on %s...\n", port)
 	if err := http.ListenAndServe(port, r); err != nil {

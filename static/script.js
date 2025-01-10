@@ -104,7 +104,7 @@ function drawStations(routeData) {
 function addStationMarker(station) {
     L.marker([station.lat, station.lon])
         .addTo(map)
-        .bindPopup(station.stationName);
+        .bindPopup(station.stationName === '東高円寺' ? '東高円寺 (制作者の最寄り)' : station.stationName);
 }
 
 // 駅リストへの追加

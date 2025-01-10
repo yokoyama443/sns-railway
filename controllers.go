@@ -28,7 +28,7 @@ func handleRoute(w http.ResponseWriter, r *http.Request) {
 	allow78flag := req.Allow78
 	fmt.Println("allow78flag: ", allow78flag)
 
-	graph, err := buildGraph(stations, db, allow78flag)
+	//graph, err := buildGraph(stations, db, allow78flag)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -41,7 +41,8 @@ func handleRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dist, prev := dijkstra(graph, start.StationCD)
+	//dist, prev := dijkstra(graph, start.StationCD, allow78flag)
+	dist, prev := dijkstra(start.StationCD, allow78flag)
 	path := reconstructPath(prev, start.StationCD, end.StationCD)
 	if path == nil {
 		http.Error(w, "経路が見つかりませんでした。", http.StatusNotFound)

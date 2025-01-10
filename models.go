@@ -14,7 +14,6 @@ const (
 	TRANSFER_COST = 10.0 // 乗換ペナルティ
 )
 
-// Station represents a railway station
 type Station struct {
 	StationCD   int
 	StationGCD  int
@@ -44,6 +43,24 @@ type Item struct {
 }
 
 type PriorityQueue []*Item
+
+var originGraph1 map[int]map[int]float64 // メトロセブン・エイトライナーを含むグラフ
+var originGraph2 map[int]map[int]float64 // メトロセブン・エイトライナーを含まないグラフ
+
+func initGraph(db *sql.DB) error {
+	stations, err := getStations(db)
+	if err != nil {
+		return err
+	}
+
+	originGraph1, err = buildGraph(stations, db, true)
+	originGraph2, err = buildGraph(stations, db, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (pq PriorityQueue) Len() int           { return len(pq) }
 func (pq PriorityQueue) Less(i, j int) bool { return pq[i].priority < pq[j].priority }
@@ -158,7 +175,6 @@ func buildGraph(stations map[int]*Station, db *sql.DB, allow78flag bool) (map[in
 
 			// メトロセブン・エイトライナーの駅は除外
 			if !allow78flag && (s1.LineCD == 9999 || s2.LineCD == 9999) {
-				fmt.Println("Allow 78 flag is false")
 				continue
 			}
 
@@ -180,11 +196,18 @@ func buildGraph(stations map[int]*Station, db *sql.DB, allow78flag bool) (map[in
 }
 
 // ダイクストラ法で最短経路を求める
-func dijkstra(graph map[int]map[int]float64, start int) (map[int]float64, map[int]int) {
+func dijkstra(start int, allow78flag bool) (map[int]float64, map[int]int) {
 	dist := make(map[int]float64)
 	prev := make(map[int]int)
 
-	for id := range graph {
+	var originGraph map[int]map[int]float64
+	if allow78flag {
+		originGraph = originGraph1
+	} else {
+		originGraph = originGraph2
+	}
+
+	for id := range originGraph {
 		dist[id] = INF
 	}
 	dist[start] = 0
@@ -200,7 +223,7 @@ func dijkstra(graph map[int]map[int]float64, start int) (map[int]float64, map[in
 			continue
 		}
 
-		for v, weight := range graph[u.stationCD] {
+		for v, weight := range originGraph[u.stationCD] {
 			alt := dist[u.stationCD] + weight
 			if alt < dist[v] {
 				dist[v] = alt
